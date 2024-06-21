@@ -19,12 +19,16 @@ public:
     ~QNetworkCapture();
 
     void showNetworkCard();
+    int capture();
+
+private slots:
+    void on_comboBox_currentIndexChanged(int index);
 
 private:
     Ui::QNetworkCapture *ui;
     pcap_if_t *all_device;
     pcap_if_t *device;
-    pcap_if_t *pointer;
+    pcap_t *pointer;
     char errbuf[PCAP_ERRBUF_SIZE];
 };
 #endif // QNETWORKCAPTURE_H

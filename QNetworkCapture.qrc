@@ -1,0 +1,12 @@
+<RCC>
+    <qresource prefix="/">
+        <file>Image/AppIcon.ico</file>
+        <file>Image/down.png</file>
+        <file>Image/downest.png</file>
+        <file>Image/empty.png</file>
+        <file>Image/start.png</file>
+        <file>Image/stop.png</file>
+        <file>Image/up.png</file>
+        <file>Image/upest.png</file>
+    </qresource>
+</RCC>

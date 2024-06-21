@@ -42,14 +42,6 @@ file(GLOB_RECURSE SRC_FILES
     ${CMAKE_SOURCE_DIR}/src/*.ui
 )
 
-include_directories(${CMAKE_SOURCE_DIR}/thirdParty/WpdPack/Include)
-set(WPDPACK_DLL_PATH ${CMAKE_SOURCE_DIR}/thirdParty/WpdPack/dll/wpcap.dll)
-file(COPY ${WPDPACK_DLL_PATH} DESTINATION ${APPLICATION_DIR_PATH}/)
-find_library(WPDPACK_LIBRARY NAMES wpcap PATHS ${CMAKE_SOURCE_DIR}/thirdParty/WpdPack/lib)
-
-set(PACKET_DLL_PATH ${CMAKE_SOURCE_DIR}/thirdParty/WpdPack/dll/Packet.dll)
-file(COPY ${PACKET_DLL_PATH} DESTINATION ${APPLICATION_DIR_PATH}/)
-
 foreach(filepath ${SRC_FILES})
     file(RELATIVE_PATH filename ${CMAKE_CURRENT_LIST_DIR} ${filepath})
 
@@ -93,13 +85,17 @@ qt_add_executable(${PROJECT_NAME}
 
 target_include_directories(${PROJECT_NAME} PRIVATE
     ${CMAKE_SOURCE_DIR}/helper
+    ${CMAKE_SOURCE_DIR}/thirdParty/Npcap/include
 )
+
+# 链接 Npcap 或 WinPcap 库
+target_link_directories(${PROJECT_NAME} PRIVATE "${CMAKE_SOURCE_DIR}/thirdParty/Npcap/lib")
 
 target_link_libraries(${PROJECT_NAME} PRIVATE
     Qt${QT_VERSION_MAJOR}::Widgets
-    ${WPDPACK_LIBRARY}
+    wpcap
+    Packet
 )
-
 
 set_target_properties(${PROJECT_NAME} PROPERTIES
     ${BUNDLE_ID_OPTION}
