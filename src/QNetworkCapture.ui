@@ -13,7 +13,63 @@
   <property name="windowTitle">
    <string>QNetworkCapture</string>
   </property>
-  <widget class="QWidget" name="centralwidget"/>
+  <widget class="QWidget" name="centralwidget">
+   <layout class="QVBoxLayout" name="verticalLayout_2">
+    <item>
+     <widget class="QWidget" name="widget" native="true">
+      <layout class="QHBoxLayout" name="horizontalLayout">
+       <item>
+        <widget class="QComboBox" name="comboBox">
+         <property name="minimumSize">
+          <size>
+           <width>300</width>
+           <height>0</height>
+          </size>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <spacer name="horizontalSpacer">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>40</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item>
+        <widget class="QLineEdit" name="lineEdit"/>
+       </item>
+      </layout>
+     </widget>
+    </item>
+    <item>
+     <widget class="QWidget" name="widget_2" native="true">
+      <layout class="QVBoxLayout" name="verticalLayout">
+       <item>
+        <widget class="QSplitter" name="splitter">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <widget class="QTableWidget" name="tableWidget"/>
+         <widget class="QTreeWidget" name="treeWidget">
+          <column>
+           <property name="text">
+            <string notr="true">1</string>
+           </property>
+          </column>
+         </widget>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+    </item>
+   </layout>
+  </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
     <rect>
@@ -23,9 +79,43 @@
      <height>17</height>
     </rect>
    </property>
+   <widget class="QMenu" name="menuproject">
+    <property name="title">
+     <string>project</string>
+    </property>
+   </widget>
+   <widget class="QMenu" name="menurun">
+    <property name="title">
+     <string>run</string>
+    </property>
+    <addaction name="actionrun_and_stop"/>
+    <addaction name="actionclear"/>
+   </widget>
+   <addaction name="menuproject"/>
+   <addaction name="menurun"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
+  <action name="actionrun_and_stop">
+   <property name="icon">
+    <iconset resource="../QNetworkCapture.qrc">
+     <normaloff>:/Image/start.png</normaloff>:/Image/start.png</iconset>
+   </property>
+   <property name="text">
+    <string>run and stop</string>
+   </property>
+  </action>
+  <action name="actionclear">
+   <property name="icon">
+    <iconset resource="../QNetworkCapture.qrc">
+     <normaloff>:/Image/empty.png</normaloff>:/Image/empty.png</iconset>
+   </property>
+   <property name="text">
+    <string>clear</string>
+   </property>
+  </action>
  </widget>
- <resources/>
+ <resources>
+  <include location="../QNetworkCapture.qrc"/>
+ </resources>
  <connections/>
 </ui>

@@ -39,7 +39,16 @@ file(GLOB_RECURSE SRC_FILES
     ${CMAKE_SOURCE_DIR}/helper/*.h*
     ${CMAKE_SOURCE_DIR}/src/*.cpp
     ${CMAKE_SOURCE_DIR}/src/*.h*
+    ${CMAKE_SOURCE_DIR}/src/*.ui
 )
+
+include_directories(${CMAKE_SOURCE_DIR}/thirdParty/WpdPack/Include)
+set(WPDPACK_DLL_PATH ${CMAKE_SOURCE_DIR}/thirdParty/WpdPack/dll/wpcap.dll)
+file(COPY ${WPDPACK_DLL_PATH} DESTINATION ${APPLICATION_DIR_PATH}/)
+find_library(WPDPACK_LIBRARY NAMES wpcap PATHS ${CMAKE_SOURCE_DIR}/thirdParty/WpdPack/lib)
+
+set(PACKET_DLL_PATH ${CMAKE_SOURCE_DIR}/thirdParty/WpdPack/dll/Packet.dll)
+file(COPY ${PACKET_DLL_PATH} DESTINATION ${APPLICATION_DIR_PATH}/)
 
 foreach(filepath ${SRC_FILES})
     file(RELATIVE_PATH filename ${CMAKE_CURRENT_LIST_DIR} ${filepath})
@@ -88,6 +97,7 @@ target_include_directories(${PROJECT_NAME} PRIVATE
 
 target_link_libraries(${PROJECT_NAME} PRIVATE
     Qt${QT_VERSION_MAJOR}::Widgets
+    ${WPDPACK_LIBRARY}
 )
 
 

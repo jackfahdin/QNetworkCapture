@@ -75,4 +75,5 @@ build/
 helper/InfoVersion.h
 action-cli/
 QNetworkCapture.qrc
+bin/
 
