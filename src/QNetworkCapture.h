@@ -28,15 +28,15 @@ public:
     int capture();
 
 public slots:
-    // void handleMessage(DataPackage data);
+    void handleMessage(DataPackage data);
 
 private slots:
     void on_comboBox_currentIndexChanged(int index);
-    // void on_tableWidget_cellClicked(int row, int column);
-    // void on_lineEdit_returnPressed();
-    // void on_lineEdit_textChanged(const QString &arg1);
-    // void on_tableWidget_currentCellChanged(int currentRow, int currentColumn,
-    //                                        int previousRow, int previousColumn);
+    void on_tableWidget_cellClicked(int row, int column);
+    void on_lineEdit_returnPressed();
+    void on_lineEdit_textChanged(const QString &arg1);
+    void on_tableWidget_currentCellChanged(int currentRow, int currentColumn,
+                                           int previousRow, int previousColumn);
 
 private:
     Ui::QNetworkCapture *ui;
@@ -44,6 +44,7 @@ private:
     pcap_if_t *device;                      // An adapter
     pcap_t *pointer;                        // data package pointer
     ReadOnlyDelegate* readOnlyDelegate;     // readonly detegate
+    Capture *captureThread = nullptr;
     int countNumber;                        // countNumber
     int rowNumber;                          // rowNumber
     QVector<DataPackage>data;               // store data
