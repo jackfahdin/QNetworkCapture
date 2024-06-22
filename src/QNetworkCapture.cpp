@@ -9,7 +9,7 @@ QNetworkCapture::QNetworkCapture(QWidget *parent)
     showNetworkCard();
 
     static bool index = false;
-    connect(ui->actionrun_and_stop, &QAction::triggered, this, [=]() {
+    connect(ui->actionStartCapture, &QAction::triggered, this, [=]() {
         index = !index;
         if(index) {
             // 开始

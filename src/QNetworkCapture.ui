@@ -76,41 +76,93 @@
      <x>0</x>
      <y>0</y>
      <width>800</width>
-     <height>21</height>
+     <height>17</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuproject">
     <property name="title">
-     <string>project</string>
+     <string>Project</string>
     </property>
    </widget>
-   <widget class="QMenu" name="menurun">
+   <widget class="QMenu" name="menuRun">
     <property name="title">
-     <string>run</string>
+     <string>Run</string>
     </property>
-    <addaction name="actionrun_and_stop"/>
-    <addaction name="actionclear"/>
+    <addaction name="actionStartCapture"/>
+    <addaction name="actionClearAll"/>
+   </widget>
+   <widget class="QMenu" name="menuEdit">
+    <property name="title">
+     <string>Edit</string>
+    </property>
+    <addaction name="actionUp"/>
+    <addaction name="actionDown"/>
+    <addaction name="actionTop"/>
+    <addaction name="actionEnd"/>
+   </widget>
+   <widget class="QMenu" name="menuHelp">
+    <property name="title">
+     <string>Help</string>
+    </property>
    </widget>
    <addaction name="menuproject"/>
-   <addaction name="menurun"/>
+   <addaction name="menuEdit"/>
+   <addaction name="menuRun"/>
+   <addaction name="menuHelp"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
-  <action name="actionrun_and_stop">
+  <action name="actionStartCapture">
    <property name="icon">
     <iconset resource="../QNetworkCapture.qrc">
      <normaloff>:/Image/start.png</normaloff>:/Image/start.png</iconset>
    </property>
    <property name="text">
-    <string>run and stop</string>
+    <string>Start/Stop</string>
    </property>
   </action>
-  <action name="actionclear">
+  <action name="actionClearAll">
    <property name="icon">
     <iconset resource="../QNetworkCapture.qrc">
      <normaloff>:/Image/empty.png</normaloff>:/Image/empty.png</iconset>
    </property>
    <property name="text">
-    <string>clear</string>
+    <string>ClearAll</string>
+   </property>
+  </action>
+  <action name="actionUp">
+   <property name="icon">
+    <iconset resource="../QNetworkCapture.qrc">
+     <normaloff>:/Image/up.png</normaloff>:/Image/up.png</iconset>
+   </property>
+   <property name="text">
+    <string>Up</string>
+   </property>
+  </action>
+  <action name="actionDown">
+   <property name="icon">
+    <iconset resource="../QNetworkCapture.qrc">
+     <normaloff>:/Image/down.png</normaloff>:/Image/down.png</iconset>
+   </property>
+   <property name="text">
+    <string>Down</string>
+   </property>
+  </action>
+  <action name="actionTop">
+   <property name="icon">
+    <iconset resource="../QNetworkCapture.qrc">
+     <normaloff>:/Image/upest.png</normaloff>:/Image/upest.png</iconset>
+   </property>
+   <property name="text">
+    <string>Top</string>
+   </property>
+  </action>
+  <action name="actionEnd">
+   <property name="icon">
+    <iconset resource="../QNetworkCapture.qrc">
+     <normaloff>:/Image/downest.png</normaloff>:/Image/downest.png</iconset>
+   </property>
+   <property name="text">
+    <string>End</string>
    </property>
   </action>
  </widget>
