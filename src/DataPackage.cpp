@@ -165,7 +165,7 @@ QString DataPackage::getMacType()
 {
     ETHERNETHEADER *ethernet;
     ethernet = (ETHERNETHEADER*)pkt_content;
-    u_short ethernetType = ntohs(ethernet->ethernetType);
+    unsigned short ethernetType = ntohs(ethernet->ethernetType);
     switch (ethernetType) {
     case 0x0800:
         return "IPv4(0x800)";
@@ -655,6 +655,7 @@ QString DataPackage::getTcpOperationKind(int kind)
     case 28:return "UTP";             // User Timeout
     case 29:return "TCP-AO";          // authenticated
     }
+    return "";
 }
 
 int DataPackage::getTcpOperationRawKind(int offset)
@@ -683,7 +684,7 @@ bool DataPackage::getTcpOperationSACK(int offset, unsigned char &length, QVector
         return false;
 }
 
-bool DataPackage::getTcpOperationMSS(int offset, u_short &mss)
+bool DataPackage::getTcpOperationMSS(int offset, unsigned short &mss)
 {
     unsigned char *tcp;
     tcp = (unsigned char*)(pkt_content + 14 + 20 + offset + 20);
@@ -691,7 +692,7 @@ bool DataPackage::getTcpOperationMSS(int offset, u_short &mss)
         tcp++;
         if(*tcp == 4) {
             tcp++;
-            u_short* Mss = (u_short*)tcp;
+            unsigned short* Mss = (unsigned short*)tcp;
             mss = ntohs(*Mss);
             return true;
         }
@@ -711,194 +712,240 @@ bool DataPackage::getTcpOperationSACKP(int offset)
         return false;
 }
 
-bool DataPackage::getTcpOperationWSOPT(int offset, unsigned char &shit){
+bool DataPackage::getTcpOperationWSOPT(int offset, unsigned char &shit)
+{
     unsigned char *tcp;
     tcp = (unsigned char*)(pkt_content + 14 + 20 + offset + 20);
-    if(*tcp == 3){
+    if(*tcp == 3) {
         tcp++;
-        if(*tcp == 3){
+        if(*tcp == 3) {
             tcp++;
             shit = *tcp;
-        }else return false;
-    }else return false;
+        } else
+            return false;
+    } else
+        return false;
+    return true;
 }
 
-bool DataPackage::getTcpOperationTSPOT(int offset, unsigned int &value, unsigned int &reply){
+bool DataPackage::getTcpOperationTSPOT(int offset, unsigned int &value, unsigned int &reply)
+{
     unsigned char *tcp;
     tcp = (unsigned char*)(pkt_content + 14 + 20 + offset + 20);
-    if(*tcp == 8){
+    if(*tcp == 8) {
         tcp++;
-        if(*tcp == 10){
+        if(*tcp == 10) {
             tcp++;
             unsigned int *pointer = (unsigned int*)(tcp);
             value = ntohl(*pointer);
             pointer++;
             reply = ntohl(*pointer);
             return true;
-        }else return false;
-    }else return false;
+        } else
+            return false;
+    }else
+        return false;
 }
+
 /* udp */
 /********************** get udp source port **********************/
-QString DataPackage::getUdpSourcePort(){
-    UDP_HEADER*udp;
-    udp = (UDP_HEADER*)(pkt_content + 20 + 14);
-    int port = ntohs(udp->src_port);
-    if(port == 53) return "domain(53)";
-    else return QString::number(port);
+QString DataPackage::getUdpSourcePort()
+{
+    UDPHEADER *udp;
+    udp = (UDPHEADER*)(pkt_content + 20 + 14);
+    int port = ntohs(udp->srcPort);
+    if(port == 53)
+        return "domain(53)";
+    else
+        return QString::number(port);
 }
-/********************** get udp destination port **********************/
-QString DataPackage::getUdpDestinationPort(){
-    UDP_HEADER*udp;
-    udp = (UDP_HEADER*)(pkt_content + 20 + 14);
-    int port = ntohs(udp->des_port);
-    if(port == 53) return "domain(53)";
-    else return QString::number(port);
-}
-/********************** get udp data length **********************/
-QString DataPackage::getUdpDataLength(){
-    UDP_HEADER*udp;
-    udp = (UDP_HEADER*)(pkt_content + 20 + 14);
-    return QString::number(ntohs(udp->data_length));
 
+/********************** get udp destination port **********************/
+QString DataPackage::getUdpDestinationPort()
+{
+    UDPHEADER *udp;
+    udp = (UDPHEADER*)(pkt_content + 20 + 14);
+    int port = ntohs(udp->desPort);
+    if(port == 53)
+        return "domain(53)";
+    else
+        return QString::number(port);
 }
+
+/********************** get udp data length **********************/
+QString DataPackage::getUdpDataLength()
+{
+    UDPHEADER *udp;
+    udp = (UDPHEADER*)(pkt_content + 20 + 14);
+    return QString::number(ntohs(udp->dataLength));
+}
+
 /********************** get udp checksum **********************/
-QString DataPackage::getUdpCheckSum(){
-    UDP_HEADER*udp;
-    udp = (UDP_HEADER*)(pkt_content + 20 + 14);
-    return QString::number(ntohs(udp->checksum),16);
+QString DataPackage::getUdpCheckSum()
+{
+    UDPHEADER *udp;
+    udp = (UDPHEADER*)(pkt_content + 20 + 14);
+    return QString::number(ntohs(udp->checkSum), 16);
 }
 
 /* dns */
 /********************** get dns transaction **********************/
-QString DataPackage::getDnsTransactionId(){
-    DNS_HEADER*dns;
-    dns = (DNS_HEADER*)(pkt_content + 14 + 20 + 8);
-    return QString::number(ntohs(dns->identification),16);
+QString DataPackage::getDnsTransactionId()
+{
+    DNSHEADER *dns;
+    dns = (DNSHEADER*)(pkt_content + 14 + 20 + 8);
+    return QString::number(ntohs(dns->identification), 16);
 }
+
 /********************** get dns flag **********************/
-QString DataPackage::getDnsFlags(){
-    DNS_HEADER*dns;
-    dns = (DNS_HEADER*)(pkt_content + 14 + 20 + 8);
+QString DataPackage::getDnsFlags()
+{
+    DNSHEADER*dns;
+    dns = (DNSHEADER*)(pkt_content + 14 + 20 + 8);
     int type = ntohs(dns->flags);
     QString info = "";
-    if((type & 0xf800) == 0x0000){
+    if((type & 0xf800) == 0x0000) {
         info = "(Standard query)";
-    }
-    else if((type & 0xf800) == 0x8000){
+    } else if((type & 0xf800) == 0x8000) {
         info = "(Standard query response)";
     }
     return QString::number(type,16) + info;
 }
+
 /********************** get dns QR **********************/
-QString DataPackage::getDnsFlagsQR(){
-    DNS_HEADER*dns;
-    dns = (DNS_HEADER*)(pkt_content + 14 + 20 + 8);
+QString DataPackage::getDnsFlagsQR()
+{
+    DNSHEADER *dns;
+    dns = (DNSHEADER*)(pkt_content + 14 + 20 + 8);
     return QString::number((ntohs(dns->flags) & 0x8000) >> 15);
 }
+
 /********************** get dns Operation code **********************/
 QString DataPackage::getDnsFlagsOpcode(){
-    DNS_HEADER*dns;
-    dns = (DNS_HEADER*)(pkt_content + 14 + 20 + 8);
+    DNSHEADER *dns;
+    dns = (DNSHEADER*)(pkt_content + 14 + 20 + 8);
     return QString::number((ntohs(dns->flags) & 0x7800) >> 11);
 }
+
 /********************** get dns AA **********************/
 QString DataPackage::getDnsFlagsAA(){
-    DNS_HEADER*dns;
-    dns = (DNS_HEADER*)(pkt_content + 14 + 20 + 8);
+    DNSHEADER *dns;
+    dns = (DNSHEADER*)(pkt_content + 14 + 20 + 8);
     return QString::number((ntohs(dns->flags) & 0x0400) >> 10);
 }
+
 /********************** get dns TC **********************/
-QString DataPackage::getDnsFlagsTC(){
-    DNS_HEADER*dns;
-    dns = (DNS_HEADER*)(pkt_content + 14 + 20 + 8);
+QString DataPackage::getDnsFlagsTC()
+{
+    DNSHEADER *dns;
+    dns = (DNSHEADER*)(pkt_content + 14 + 20 + 8);
     return QString::number((ntohs(dns->flags) & 0x0200) >> 9);
 }
+
 /********************** get dns RD **********************/
-QString DataPackage::getDnsFlagsRD(){
-    DNS_HEADER*dns;
-    dns = (DNS_HEADER*)(pkt_content + 14 + 20 + 8);
+QString DataPackage::getDnsFlagsRD()
+{
+    DNSHEADER *dns;
+    dns = (DNSHEADER*)(pkt_content + 14 + 20 + 8);
     return QString::number((ntohs(dns->flags) & 0x0100) >> 8);
 }
+
 /********************** get dns RA **********************/
-QString DataPackage::getDnsFlagsRA(){
-    DNS_HEADER*dns;
-    dns = (DNS_HEADER*)(pkt_content + 14 + 20 + 8);
+QString DataPackage::getDnsFlagsRA()
+{
+    DNSHEADER *dns;
+    dns = (DNSHEADER*)(pkt_content + 14 + 20 + 8);
     return QString::number((ntohs(dns->flags) & 0x0080) >> 7);
 }
+
 /********************** get dns Z(reserved) **********************/
-QString DataPackage::getDnsFlagsZ(){
-    DNS_HEADER*dns;
-    dns = (DNS_HEADER*)(pkt_content + 14 + 20 + 8);
+QString DataPackage::getDnsFlagsZ()
+{
+    DNSHEADER *dns;
+    dns = (DNSHEADER*)(pkt_content + 14 + 20 + 8);
     return QString::number((ntohs(dns->flags) & 0x0070) >> 4);
 }
+
 /********************** get dns Response code **********************/
-QString DataPackage::getDnsFlagsRcode(){
-    DNS_HEADER*dns;
-    dns = (DNS_HEADER*)(pkt_content + 14 + 20 + 8);
+QString DataPackage::getDnsFlagsRcode()
+{
+    DNSHEADER *dns;
+    dns = (DNSHEADER*)(pkt_content + 14 + 20 + 8);
     return QString::number((ntohs(dns->flags) & 0x000f));
 }
+
 /********************** get dns Question number **********************/
 QString DataPackage::getDnsQuestionNumber(){
-    DNS_HEADER*dns;
-    dns = (DNS_HEADER*)(pkt_content + 14 + 20 + 8);
+    DNSHEADER *dns;
+    dns = (DNSHEADER*)(pkt_content + 14 + 20 + 8);
     return QString::number(ntohs(dns->question));
 }
+
 /********************** get dns Answer number **********************/
-QString DataPackage::getDnsAnswerNumber(){
-    DNS_HEADER*dns;
-    dns = (DNS_HEADER*)(pkt_content + 14 + 20 + 8);
+QString DataPackage::getDnsAnswerNumber()
+{
+    DNSHEADER *dns;
+    dns = (DNSHEADER*)(pkt_content + 14 + 20 + 8);
     return QString::number(ntohs(dns->answer));
 }
+
 /********************** get dns Authority number **********************/
-QString DataPackage::getDnsAuthorityNumber(){
-    DNS_HEADER*dns;
-    dns = (DNS_HEADER*)(pkt_content + 14 + 20 + 8);
+QString DataPackage::getDnsAuthorityNumber()
+{
+    DNSHEADER *dns;
+    dns = (DNSHEADER*)(pkt_content + 14 + 20 + 8);
     return QString::number(ntohs(dns->authority));
 }
+
 /********************** get dns Additional number **********************/
-QString DataPackage::getDnsAdditionalNumber(){
-    DNS_HEADER*dns;
-    dns = (DNS_HEADER*)(pkt_content + 14 + 20 + 8);
+QString DataPackage::getDnsAdditionalNumber()
+{
+    DNSHEADER *dns;
+    dns = (DNSHEADER*)(pkt_content + 14 + 20 + 8);
     return QString::number(ntohs(dns->additional));
 }
+
 /********************** get dns query result **********************/
-void DataPackage::getDnsQueriesDomain(QString&name,int&Type,int&Class){
-    DNS_HEADER*dns;
-    dns = (DNS_HEADER*)(pkt_content + 14 + 20 + 8);
+void DataPackage::getDnsQueriesDomain(QString&name,int&Type,int&Class)
+{
+    DNSHEADER*dns;
+    dns = (DNSHEADER*)(pkt_content + 14 + 20 + 8);
     char*domain = (char*)(pkt_content + 14 + 20 + 8 + 12);
-    while(*domain != 0x00){
-        if(domain && (*domain) <= 64){
+    while(*domain != 0x00) {
+        if(domain && (*domain) <= 64) {
             int length = *domain;
             domain++;
-            for(int k = 0;k < length;k++){
+            for(int k = 0;k < length;k++) {
                 name += (*domain);
                 domain++;
             }
             name += ".";
-        }else break;
+        } else
+            break;
     }
     domain++;
     name = name.left(name.length() - 1);
-    DNS_QUESITON *qus = (DNS_QUESITON*)(domain);
-    Type = ntohs(qus->query_type);
-    Class = ntohs(qus->query_class);
+    DNSQUESITON *qus = (DNSQUESITON*)(domain);
+    Type = ntohs(qus->queryType);
+    Class = ntohs(qus->queryClass);
 }
+
 /********************** get dns domian name **********************/
-QString DataPackage::getDnsDomainName(int offset){
-    char*dns;
+QString DataPackage::getDnsDomainName(int offset)
+{
+    char *dns;
     dns = (char*)(pkt_content + 14 + 20 + 8 + offset);
     QString name = "";
-    while(dns && *dns != 0x00){
-        if((unsigned char)(*dns) <= 64){
+    while(dns && *dns != 0x00) {
+        if((unsigned char)(*dns) <= 64) {
             int length = *dns;
             dns++;
-            for(int k = 0;k<length;k++){
+            for(int k = 0; k<length; k++) {
                 name += (*dns);
                 dns++;
             }
             name += ".";
-        }else if(((*dns) & 0xc0) == 0xc0){
+        }else if(((*dns) & 0xc0) == 0xc0) {
             int accOffset = (((*dns) & 0x3f) << 8);
             dns++;
             accOffset += (unsigned char)(*dns);
@@ -910,40 +957,44 @@ QString DataPackage::getDnsDomainName(int offset){
     name = name.left(name.length() - 1);
     return name;
 }
+
 /********************** get dns answer result **********************/
-int DataPackage::getDnsAnswersDomain(int offset, QString &name1, u_short &Type, u_short &Class, unsigned int &ttl, u_short &dataLength,QString&name2){
-    char*dns = (char*)(pkt_content + 14 + 20 + 8 + 12 + offset);
+int DataPackage::getDnsAnswersDomain(int offset, QString &name1, unsigned short &Type,
+                                     unsigned short &Class, unsigned int &ttl,
+                                     unsigned short &dataLength,QString&name2)
+{
+    char *dns = (char*)(pkt_content + 14 + 20 + 8 + 12 + offset);
     if(((*dns) & 0xc0) == 0xc0){
         int accOffset = (((*dns) & 0x3f) << 8);
         dns++; //
         accOffset += (*dns);
         name1 = getDnsDomainName(accOffset);
         dns++; //
-        DNS_ANSWER*answer = (DNS_ANSWER*)(dns);
-        Type = ntohs(answer->answer_type);
-        Class = ntohs(answer->answer_class);
+        DNSANSWER*answer = (DNSANSWER*)(dns);
+        Type = ntohs(answer->answerType);
+        Class = ntohs(answer->answerClass);
         ttl = ntohl(answer->TTL);
         dataLength = ntohs(answer->dataLength);
         dns += (2 + 2 + 4 + 2);
-        if(dataLength == 4){
-            for(int i = 0;i < 4;i++){
+        if(dataLength == 4) {
+            for(int i = 0;i < 4;i++) {
                 name2 += QString::number((unsigned char)(*dns));
                 name2 += ".";
                 dns++;
             }
-        }else{
-            for(int k = 0;k<dataLength;k++){
-                if((unsigned char)(*dns) <= 64){
+        } else {
+            for(int k = 0;k<dataLength;k++) {
+                if((unsigned char)(*dns) <= 64) {
                     int length = *dns;
                     dns++;
                     k++;
-                    for(int j = 0;j < length;j++){
+                    for(int j = 0;j < length;j++) {
                         name2 += *dns;
                         dns++;
                         k++;
                     }
                     name2 += ".";
-                }else if(((*dns) & 0xc0) == 0xc0){
+                }else if(((*dns) & 0xc0) == 0xc0) {
                     int accOffset = (((*dns) & 0x3f) << 8);
                     dns++;
                     k++;
@@ -957,32 +1008,32 @@ int DataPackage::getDnsAnswersDomain(int offset, QString &name1, u_short &Type, 
         name2 = name2.left(name2.length() - 1);
         return dataLength + 2 + 2 + 2 + 4 + 2;
 
-    }else{
+    } else {
         name1 = getDnsDomainName(offset + 12);
-        DNS_ANSWER*answer = (DNS_ANSWER*)(dns + name1.size() + 2);
-        Type = ntohs(answer->answer_type);
-        Class = ntohs(answer->answer_class);
+        DNSANSWER*answer = (DNSANSWER*)(dns + name1.size() + 2);
+        Type = ntohs(answer->answerType);
+        Class = ntohs(answer->answerClass);
         ttl = ntohl(answer->TTL);
         dataLength = ntohs(answer->dataLength);
-        if(dataLength == 4){
+        if(dataLength == 4) {
             dns += (2 + 2 + 4 + 2 + name1.size() + 1);
             for(int i = 0;i < 4;i++){
-                name2 += (unsigned char)(*dns);
+                name2 += (char)(*dns);
                 dns++;
             }
-        }else{
+        } else {
             for(int k = 0;k<dataLength;k++){
-                if((unsigned char)(*dns) <= 64){
+                if((unsigned char)(*dns) <= 64) {
                     int length = *dns;
                     dns++;
                     k++;
-                    for(int j = 0;j < length;j++){
+                    for(int j = 0;j < length;j++) {
                         name2 += *dns;
                         dns++;
                         k++;
                     }
                     name2 += ".";
-                }else if(((*dns) & 0xc0) == 0xc0){
+                } else if(((*dns) & 0xc0) == 0xc0) {
                     int accOffset = (((*dns) & 0x3f) << 8);
                     dns++;
                     k++;
@@ -997,8 +1048,10 @@ int DataPackage::getDnsAnswersDomain(int offset, QString &name1, u_short &Type, 
         return dataLength + 2 + 2 + 2 + 4 + 2 + name1.size() + 2;
     }
 }
+
 /********************** get dns domain type **********************/
-QString DataPackage::getDnsDomainType(int type){
+QString DataPackage::getDnsDomainType(int type)
+{
     switch (type) {
     case 1: return "A (Host Address)";
     case 2:return "NS";
@@ -1017,46 +1070,65 @@ QString DataPackage::getDnsDomainType(int type){
 
 // tls
 /********************** get tls protocol to check the data is meet this format or not **********************/
-bool DataPackage::getisTlsProtocol(int offset){
-    char*ssl;
+bool DataPackage::getisTlsProtocol(int offset)
+{
+    char *ssl;
     ssl = (char*)(pkt_content + 14 + 20 + 20 + offset);
     unsigned char type = (unsigned char)(*ssl);
-    if(type >= 20 && type <= 23){
-        u_short *point = (u_short*)(ssl+1);
+    if(type >= 20 && type <= 23) {
+        unsigned short *point = (unsigned short*)(ssl+1);
         int version = ntohs(*point);
         if(version >= 0x0301 && version <= 0x0304)
             return true;
-        else return false;
+        else
+            return false;
     }
-    else return false;
+    else
+        return false;
 }
+
 /********************** get tls basic information **********************/
-void DataPackage::getTlsBasicInfo(int offset, unsigned char &contentType, u_short &version, u_short &length){
-    unsigned char*ssl;
+void DataPackage::getTlsBasicInfo(int offset, unsigned char &contentType,
+                                  unsigned short &version, unsigned short &length)
+{
+    unsigned char *ssl;
     ssl = (unsigned char*)(pkt_content + 14 + 20 + offset);
     contentType = *ssl;
     ssl++;
-    u_short* pointer = (u_short*)(ssl);
+    unsigned short *pointer = (unsigned short*)(ssl);
     version = ntohs(*pointer);
     pointer++;
     length = ntohs(*(pointer));
 }
 
 /********************** get tls handshake type **********************/
-void DataPackage::getTlsHandshakeType(int offset, unsigned char &type){
-    unsigned char*ssl;
+void DataPackage::getTlsHandshakeType(int offset, unsigned char &type)
+{
+    unsigned char *ssl;
     ssl = (unsigned char*)(pkt_content + 14 + 20 + offset);
     type = *ssl;
 }
+
 /********************** get tls client hello information **********************/
-void DataPackage::getTlsClientHelloInfo(int offset, unsigned char &handShakeType, int &length, u_short &version, QString &random, unsigned char &sessionIdLength, QString &sessionId,u_short&cipherLength,QVector<u_short> &cipherSuit,unsigned char& cmLength,QVector<unsigned char>&CompressionMethod,u_short&extensionLength){
-    unsigned char*ssl;
+void DataPackage::getTlsClientHelloInfo(int offset, unsigned char &handShakeType,
+                                        int &length,
+                                        unsigned short &version,
+                                        QString &random,
+                                        unsigned char &sessionIdLength,
+                                        QString &sessionId,
+                                        unsigned short &cipherLength,
+                                        QVector<unsigned short> &cipherSuit,
+                                        unsigned char &cmLength,
+                                        QVector<unsigned char>&CompressionMethod,
+                                        unsigned short&extensionLength)
+{
+    unsigned char *ssl;
     ssl = (unsigned char*)(pkt_content + 14 + 20 + offset);
     handShakeType = *ssl;
     ssl++;
     length = (*ssl) * 4096 + (*(ssl+1)) * 256 + *(ssl + 2);
     ssl += 3;
-    u_short* ver = (u_short*)(ssl);
+    unsigned short* ver = (unsigned short*)(ssl);
     version = ntohs(*ver);
     ver++;
     ssl += 2;
@@ -1070,7 +1142,7 @@ void DataPackage::getTlsClientHelloInfo(int offset, unsigned char &handShakeType
         sessionId += QString::number(*ssl,16);
         ssl++;
     }
-    u_short* clen = (u_short*)(ssl);
+    unsigned short* clen = (unsigned short*)(ssl);
     cipherLength = ntohs(*clen);
     clen++;
     for(int k = 0;k < cipherLength/2;k++){
@@ -1087,14 +1159,20 @@ void DataPackage::getTlsClientHelloInfo(int offset, unsigned char &handShakeType
     extensionLength = (*(ssl)) * 256 + *(ssl + 1);
 }
 
-void DataPackage::getTlsServerHelloInfo(int offset, unsigned char &handShakeType, int &length, u_short &version, QString& random, unsigned char &sessionIdLength, QString &sessionId, u_short &cipherSuit, unsigned char &compressionMethod, u_short &extensionLength){
-    unsigned char*ssl;
+void DataPackage::getTlsServerHelloInfo(int offset, unsigned char &handShakeType,
+                                        int &length, unsigned short &version,
+                                        QString& random, unsigned char &sessionIdLength,
+                                        QString &sessionId, unsigned short &cipherSuit,
+                                        unsigned char &compressionMethod,
+                                        unsigned short &extensionLength)
+{
+    unsigned char *ssl;
     ssl = (unsigned char*)(pkt_content + 14 + 20 + offset);
     handShakeType = *ssl;
     ssl++;
     length = (*ssl) * 4096 + (*(ssl + 1)) * 256 + *(ssl + 2);
     ssl += 3;
-    u_short* ver = (u_short*)(ssl);
+    unsigned short* ver = (unsigned short*)(ssl);
     version = ntohs(*ver);
     ver++;
     ssl += 2;
@@ -1108,14 +1186,23 @@ void DataPackage::getTlsServerHelloInfo(int offset, unsigned char &handShakeType
         sessionId += QString::number(*ssl,16);
         ssl++;
     }
-    u_short*point = (u_short*)(ssl);
+    unsigned short*point = (unsigned short*)(ssl);
     cipherSuit = ntohs(*point);
     ssl += 2;
     compressionMethod = *ssl;
     ssl++;
     extensionLength = (*ssl) * 256 + (*(ssl + 1));
 }
-void DataPackage::getTlsServerKeyExchange(int offset, unsigned char &handShakeType, int &length, unsigned char &curveType, u_short &curveName, unsigned char &pubLength, QString &pubKey, u_short &sigAlgorithm, u_short &sigLength, QString &sig){
+
+void DataPackage::getTlsServerKeyExchange(int offset, unsigned char &handShakeType,
+                                          int &length, unsigned char &curveType,
+                                          unsigned short &curveName,
+                                          unsigned char &pubLength,
+                                          QString &pubKey,
+                                          unsigned short &sigAlgorithm,
+                                          unsigned short &sigLength,
+                                          QString &sig)
+{
     unsigned char*ssl;
     ssl = (unsigned char*)(pkt_content + 14 + 20 + offset);
     handShakeType = *ssl;
@@ -1124,7 +1211,7 @@ void DataPackage::getTlsServerKeyExchange(int offset, unsigned char &handShakeTy
     ssl += 3;
     curveType = (*ssl);
     ssl++;
-    u_short*point = (u_short*)(ssl);
+    unsigned short*point = (unsigned short*)(ssl);
     curveName = ntohs(*point);
     ssl += 2;
     pubLength = (*ssl);
@@ -1133,7 +1220,7 @@ void DataPackage::getTlsServerKeyExchange(int offset, unsigned char &handShakeTy
         pubKey += QString::number(*ssl,16);
         ssl++;
     }
-    point = (u_short*)(ssl);
+    point = (unsigned short*)(ssl);
     sigAlgorithm = ntohs(*point);
     point++;
     sigLength = ntohs(*point);
@@ -1143,8 +1230,10 @@ void DataPackage::getTlsServerKeyExchange(int offset, unsigned char &handShakeTy
         ssl++;
     }
 }
+
 /********************** get tls handshake type **********************/
-QString DataPackage::getTlsHandshakeType(int type){
+QString DataPackage::getTlsHandshakeType(int type)
+{
     switch (type) {
     case 1:return "Client Hello";
     case 2:return "Server hello";
@@ -1157,8 +1246,10 @@ QString DataPackage::getTlsHandshakeType(int type){
     default:return "";
     }
 }
+
 /********************** get tls content type **********************/
-QString DataPackage::getTlsContentType(int type){
+QString DataPackage::getTlsContentType(int type)
+{
     switch (type) {
     case 20: return "Change Cipher Spec";
     case 21:return "Alert";
@@ -1167,8 +1258,10 @@ QString DataPackage::getTlsContentType(int type){
     default:return "";
     }
 }
+
 /********************** get tls version **********************/
-QString DataPackage::getTlsVersion(int version){
+QString DataPackage::getTlsVersion(int version)
+{
     switch (version) {
     case 0x0300:return "SSL 3.0";
     case 0x0301:return "TLS 1.0";
@@ -1178,8 +1271,10 @@ QString DataPackage::getTlsVersion(int version){
     default:return "Unkonwn";
     }
 }
+
 /********************** get tls handshake cipher suites **********************/
-QString DataPackage::getTlsHandshakeCipherSuites(u_short code){
+QString DataPackage::getTlsHandshakeCipherSuites(unsigned short code)
+{
     switch (code) {
     case 0x00ff: return "TLS_EMPTY_RENEGOTIATION_INFO_SCSV (0x00ff)";
     case 0xc02c: return "TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384 (0xc02c)";
@@ -1331,15 +1426,18 @@ QString DataPackage::getTlsHandshakeCipherSuites(u_short code){
     default:return "0x" + QString::number(code,16);
     }
 }
+
 /********************** get tls handshake compression **********************/
-QString DataPackage::getTlsHandshakeCompression(unsigned char code){
+QString DataPackage::getTlsHandshakeCompression(unsigned char code)
+{
     switch (code) {
     case 0:return "null";
     default:return "";
     }
 }
 
-QString DataPackage::getTlsHandshakeExtension(u_short type){
+QString DataPackage::getTlsHandshakeExtension(unsigned short type)
+{
     switch (type) {
     case 0: return "server_name";
     case 5: return "status_request";
@@ -1359,7 +1457,8 @@ QString DataPackage::getTlsHandshakeExtension(u_short type){
     }
 }
 
-QString DataPackage::getTlsHandshakeExtensionECPointFormat(unsigned char type){
+QString DataPackage::getTlsHandshakeExtensionECPointFormat(unsigned char type)
+{
     switch (type) {
     case 0:return "EC point format: uncompressed (0)";
     case 1:return "EC point format: ansiX962_compressed_prime (1)";
@@ -1368,7 +1467,8 @@ QString DataPackage::getTlsHandshakeExtensionECPointFormat(unsigned char type){
     }
 }
 
-QString DataPackage::getTlsHandshakeExtensionSupportGroup(u_short type){
+QString DataPackage::getTlsHandshakeExtensionSupportGroup(unsigned short type)
+{
     switch (type) {
     case 0x001d:return "x25519 (0x001d)";
     case 0x0017:return "secp256r1 (0x0017)";
@@ -1387,7 +1487,8 @@ QString DataPackage::getTlsHandshakeExtensionSupportGroup(u_short type){
     }
 }
 
-QString DataPackage::getTlsHadshakeExtensionHash(unsigned char type){
+QString DataPackage::getTlsHadshakeExtensionHash(unsigned char type)
+{
     switch (type) {
     case 4:return "SHA256";
     case 5:return "SHA384";
@@ -1398,7 +1499,8 @@ QString DataPackage::getTlsHadshakeExtensionHash(unsigned char type){
     default:return "Unknown";
     }
 }
-QString DataPackage::getTlsHadshakeExtensionSignature(unsigned char type){
+QString DataPackage::getTlsHadshakeExtensionSignature(unsigned char type)
+{
     switch (type) {
     case 1:return "RSA";
     case 2:return "DSA";
@@ -1406,15 +1508,21 @@ QString DataPackage::getTlsHadshakeExtensionSignature(unsigned char type){
     default:return "Unknown";
     }
 }
-u_short DataPackage::getTlsExtensionType(int offset){
-    u_short*ssl;
-    ssl = (u_short*)(pkt_content + 14 + 20 + offset);
+unsigned short DataPackage::getTlsExtensionType(int offset){
+    unsigned short*ssl;
+    ssl = (unsigned short*)(pkt_content + 14 + 20 + offset);
     return ntohs(*ssl);
 }
 
-void DataPackage::getTlsExtensionServerName(int offset, u_short &type, u_short &length, u_short &listLength, unsigned char &nameType, u_short &nameLength, QString &name){
-    u_short*ssl;
-    ssl = (u_short*)(pkt_content + 14 + 20 + offset);
+void DataPackage::getTlsExtensionServerName(int offset, unsigned short &type,
+                                            unsigned short &length,
+                                            unsigned short &listLength,
+                                            unsigned char &nameType,
+                                            unsigned short &nameLength,
+                                            QString &name)
+{
+    unsigned short*ssl;
+    ssl = (unsigned short*)(pkt_content + 14 + 20 + offset);
     type = ntohs(*ssl);
     ssl++;
     length = ntohs(*ssl);
@@ -1427,15 +1535,21 @@ void DataPackage::getTlsExtensionServerName(int offset, u_short &type, u_short &
     nameLength = (*p) * 16 + *(p+1);
     p += 2;
     for(int i = 0;i < nameLength;i++){
-        name += (*p);
+        name += (char)(*p);
         p++;
     }
     return;
 }
 
-void DataPackage::getTlsExtensionKeyShare(int offset, u_short &type, u_short &length, u_short &shareLength, u_short &group, u_short &exchangeLength,QString &exchange){
-    u_short*ssl;
-    ssl = (u_short*)(pkt_content + 14 + 20 + offset);
+void DataPackage::getTlsExtensionKeyShare(int offset, unsigned short &type,
+                                          unsigned short &length,
+                                          unsigned short &shareLength,
+                                          unsigned short &group,
+                                          unsigned short &exchangeLength,
+                                          QString &exchange)
+{
+    unsigned short *ssl;
+    ssl = (unsigned short*)(pkt_content + 14 + 20 + offset);
     type = ntohs(*ssl);
     ssl++;
     length = ntohs(*ssl);
@@ -1453,9 +1567,13 @@ void DataPackage::getTlsExtensionKeyShare(int offset, u_short &type, u_short &le
     }
 }
 
-void DataPackage::getTlsExtensionEcPointFormats(int offset, u_short &type, u_short &length,unsigned char& ecLength,QVector<unsigned char> &EC){
-    u_short*ssl;
-    ssl = (u_short*)(pkt_content + 14 + 20 + offset);
+void DataPackage::getTlsExtensionEcPointFormats(int offset, unsigned short &type,
+                                                unsigned short &length,
+                                                unsigned char &ecLength,
+                                                QVector<unsigned char> &EC)
+{
+    unsigned short*ssl;
+    ssl = (unsigned short*)(pkt_content + 14 + 20 + offset);
     type = ntohs(*ssl);
     ssl++;
     length = ntohs(*ssl);
@@ -1469,9 +1587,12 @@ void DataPackage::getTlsExtensionEcPointFormats(int offset, u_short &type, u_sho
     }
 }
 
-void DataPackage::getTlsExtensionOther(int offset, u_short &type, u_short &length,QString&data){
-    u_short*ssl;
-    ssl = (u_short*)(pkt_content + 14 + 20 + offset);
+void DataPackage::getTlsExtensionOther(int offset, unsigned short &type,
+                                       unsigned short &length,
+                                       QString&data)
+{
+    unsigned short*ssl;
+    ssl = (unsigned short*)(pkt_content + 14 + 20 + offset);
     type = ntohs(*ssl);
     ssl++;
     length = ntohs(*ssl);
@@ -1483,9 +1604,13 @@ void DataPackage::getTlsExtensionOther(int offset, u_short &type, u_short &lengt
     }
 }
 
-void DataPackage::getTlsExtensionSupportGroups(int offset, u_short &type, u_short &length, u_short &groupListLength, QVector<u_short> &group){
-    u_short*ssl;
-    ssl = (u_short*)(pkt_content + 14 + 20 + offset);
+void DataPackage::getTlsExtensionSupportGroups(int offset, unsigned short &type,
+                                               unsigned short &length,
+                                               unsigned short &groupListLength,
+                                               QVector<unsigned short> &group)
+{
+    unsigned short*ssl;
+    ssl = (unsigned short*)(pkt_content + 14 + 20 + offset);
     type = ntohs(*ssl);
     ssl++;
     length = ntohs(*ssl);
@@ -1498,34 +1623,44 @@ void DataPackage::getTlsExtensionSupportGroups(int offset, u_short &type, u_shor
     }
 }
 
-void DataPackage::getTlsExtensionSessionTicket(int offset, u_short &type, u_short &length){
-    u_short*ssl;
-    ssl = (u_short*)(pkt_content + 14 + 20 + offset);
+void DataPackage::getTlsExtensionSessionTicket(int offset, unsigned short &type,
+                                               unsigned short &length)
+{
+    unsigned short*ssl;
+    ssl = (unsigned short*)(pkt_content + 14 + 20 + offset);
     type = ntohs(*ssl);
     ssl++;
     length = ntohs(*ssl);
     ssl++;
 }
 
-void DataPackage::getTlsExtensionEncryptThenMac(int offset, u_short &type, u_short &length){
-    u_short*ssl;
-    ssl = (u_short*)(pkt_content + 14 + 20 + offset);
+void DataPackage::getTlsExtensionEncryptThenMac(int offset, unsigned short &type,
+                                                unsigned short &length)
+{
+    unsigned short*ssl;
+    ssl = (unsigned short*)(pkt_content + 14 + 20 + offset);
     type = ntohs(*ssl);
     ssl++;
     length = ntohs(*ssl);
 }
 
-void DataPackage::getTlsExtensionExtendMasterSecret(int offset, u_short &type, u_short &length){
-    u_short*ssl;
-    ssl = (u_short*)(pkt_content + 14 + 20 + offset);
+void DataPackage::getTlsExtensionExtendMasterSecret(int offset, unsigned short &type,
+                                                    unsigned short &length)
+{
+    unsigned short*ssl;
+    ssl = (unsigned short*)(pkt_content + 14 + 20 + offset);
     type = ntohs(*ssl);
     ssl++;
     length = ntohs(*ssl);
 }
 
-void DataPackage::getTlsExtensionSignatureAlgorithms(int offset, u_short &type, u_short &length, u_short &algorithmLength, QVector<u_short> &signatureAlgorithm){
-    u_short*ssl;
-    ssl = (u_short*)(pkt_content + 14 + 20 + offset);
+void DataPackage::getTlsExtensionSignatureAlgorithms(int offset, unsigned short &type,
+                                                     unsigned short &length,
+                                                     unsigned short &algorithmLength,
+                                                     QVector<unsigned short> &signatureAlgorithm)
+{
+    unsigned short*ssl;
+    ssl = (unsigned short*)(pkt_content + 14 + 20 + offset);
     type = ntohs(*ssl);
     ssl++;
     length = ntohs(*ssl);
@@ -1538,9 +1673,13 @@ void DataPackage::getTlsExtensionSignatureAlgorithms(int offset, u_short &type, 
     }
 }
 
-void DataPackage::getTlsExtensionSupportVersions(int offset, u_short &type, u_short &length, unsigned char &supportLength, QVector<u_short> &supportVersion){
-    u_short*ssl;
-    ssl = (u_short*)(pkt_content + 14 + 20 + offset);
+void DataPackage::getTlsExtensionSupportVersions(int offset, unsigned short &type,
+                                                 unsigned short &length,
+                                                 unsigned char &supportLength,
+                                                 QVector<unsigned short> &supportVersion)
+{
+    unsigned short*ssl;
+    ssl = (unsigned short*)(pkt_content + 14 + 20 + offset);
     type = ntohs(*ssl);
     ssl++;
     length = ntohs(*ssl);
@@ -1548,15 +1687,19 @@ void DataPackage::getTlsExtensionSupportVersions(int offset, u_short &type, u_sh
     unsigned char*point = (unsigned char*)(ssl);
     supportLength = *point;
     point++;
-    ssl = (u_short*)(point);
+    ssl = (unsigned short*)(point);
     for(int i = 0;i < supportLength;i++){
         supportVersion.push_back(ntohs(*ssl));
         ssl++;
     }
 }
-void DataPackage::getTlsExtensionPadding(int offset, u_short &type, u_short &length,QString& data){
-    u_short*ssl;
-    ssl = (u_short*)(pkt_content + 14 + 20 + offset);
+
+void DataPackage::getTlsExtensionPadding(int offset, unsigned short &type,
+                                         unsigned short &length,
+                                         QString& data)
+{
+    unsigned short*ssl;
+    ssl = (unsigned short*)(pkt_content + 14 + 20 + offset);
     type = ntohs(*ssl);
     ssl++;
     length = ntohs(*ssl);

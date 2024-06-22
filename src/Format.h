@@ -24,7 +24,7 @@
 typedef struct ethernetHeader {         // 14 byte
     unsigned char ethernetDesHost[6];   // destination addr [6 byte]
     unsigned char ethernetSrcHost[6];   // source addr [6 byte]
-    unsigned short ethernetType[2];     // type [2 byte]
+    unsigned short ethernetType;     // type [2 byte]
 } ETHERNETHEADER;
 
 

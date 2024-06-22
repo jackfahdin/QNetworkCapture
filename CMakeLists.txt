@@ -95,6 +95,7 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
     Qt${QT_VERSION_MAJOR}::Widgets
     wpcap
     Packet
+    ws2_32
 )
 
 set_target_properties(${PROJECT_NAME} PROPERTIES

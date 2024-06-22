@@ -1,5 +1,5 @@
-#ifndef QNETWORKCAPTURE_H
-#define QNETWORKCAPTURE_H
+#ifndef DATAPACKAGE_H
+#define DATAPACKAGE_H
 
 #include "Format.h"
 
@@ -253,4 +253,4 @@ public:
     static QString getTlsHadshakeExtensionHash(unsigned char type);               // Parsing TLS hash
 };
 
-#endif // QNETWORKCAPTURE_H
+#endif // DATAPACKAGE_H
